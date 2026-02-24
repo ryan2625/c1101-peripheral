@@ -31,7 +31,7 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/periph
 
 extern "C" void app_main(void)
 {
-    vTaskDelay(pdMS_TO_TICKS(20000));
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     ESP_LOGI("MAIN", "Hello World!");
 
@@ -117,8 +117,11 @@ extern "C" void app_main(void)
     can send a dummy byte after the fact.
     */
     spi_transaction_t t = {};
-    uint8_t tx[2] = {0xF0, 0x00}; // The address of register is 0xF0. We will send this to the slave, as well as a dummy byte after
-    uint8_t rx[2] = {0x00, 0x00}; // Two bytes of buffer that we will receive back. A bit shifts in and out every clock cycle.
+    // The address of register is 0xF0. We will send this to the slave, as well as a dummy byte after.
+    uint8_t tx[2] = {0xF0, 0x00}; 
+    // Two bytes of buffer that we will receive back. A bit shifts in and out every clock cycle. The bytes inside are arbitrary.
+    // According to the data sheet, we will always get back a status byte from cc1101 and then the response. 
+    uint8_t rx[2] = {0x00, 0x00};
     t.tx_buffer = tx;
     t.rx_buffer = rx;
     t.length = 16; // Two Bytes
@@ -130,7 +133,9 @@ extern "C" void app_main(void)
     // spi_device_polling_transmit();
     // spi_device_polling_start();
     // spi_device_polling_end();
-
+    ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &t));
+    // We can then log the values of the two bytes that are now filled from the slave.
+    ESP_LOGI("CC1101", "%X %X", rx[0], rx[1]);    
     /*
     In the Master Slave paradigm, the slave cannot send bits unless the master is clocking
     So in order to properly retrieve a register value, we first send the header byte telling 
