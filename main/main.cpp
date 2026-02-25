@@ -1,31 +1,12 @@
 /******************************************************************************
  * Author: Ryan Freas
- * Project: CC1101 SPI Interface (ESP-IDF)
+ * Project: Interfacing your ESP32 and CC1101
  *
  * Purpose:
- * Basic Program to confirm your ESP-32 and cc1101 device are communicating properly
- * 
- * Pinout:
- * VCC -> 3.3v
- * CSN -> GPIO 5 (chip select, this can be any suitable GPIO pin)
- * MOSI -> GPIO 23 (VSPI MOSI)
- * GD02 -> No mapping 
- * GND -> GND
- * GD00 -> GPIO 4 (Any suitable GPIO)
- * SCK -> GPIO 18 (CLK Clock Signal)
- * MISO -> GPIO 19 (VSPI MISO)
- * 
- * cc1101 Byte Contract:
- * Bit 7   Bit 6   Bit 5-0
- * R/W     Burst    Address 
- * 
- * Further reading:
- * https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/spi_master.html
- * https://www.ti.com/lit/ds/symlink/cc1101.pdf
+ * A program to confirm your ESP32 and CC1101 device are communicating properly
  * 
  ******************************************************************************/
 
-#include <stdio.h>
 #include "esp_log.h"
 
 extern "C" {
@@ -71,7 +52,6 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(1000));
     ESP_LOGI("MAIN", "Hello World...?");
 
-
     // ======================CONFIGURE BUS SECTION=========================== //
     spi_bus_config_t busConfig = {};
     busConfig.mosi_io_num = GPIO_NUM_23;
@@ -84,7 +64,6 @@ extern "C" void app_main(void)
     // SPI_DMA_DISABLED: Simple config for small transfer size, no need for DMA
     ESP_ERROR_CHECK(spi_bus_initialize(SPI3_HOST, &busConfig, SPI_DMA_DISABLED));
     // ===================== END CONFIGURE BUS SECTION ====================== //
-
 
     // ===================== CONFIGURE DEVICE SECTION ======================= //
     spi_device_interface_config_t deviceConfig = {};
@@ -100,17 +79,15 @@ extern "C" void app_main(void)
     // -    There is no delineation of bits to send in the datasheet, so we simply use a raw SPI transfer
     //      No command phase, no address phase, no dummy phase.
     // mode:
-    // -    SPI clock mode. No clue how to derive this so I guessed lol.
+    // -    SPI clock mode.
     // clock_speed_hz:
     // -    The max clock speed as specified by the data sheet is 10 MHz
     // spics_io_num:
-    // -    The pin we mapped CSN to
+    // -    The pin we mapped CSn to
     // queue_size:
     // -    We are not using any async methods, so queue size is 1
-
     ESP_ERROR_CHECK(spi_bus_add_device(SPI3_HOST, &deviceConfig, &cc1101));
     // =================== END CONFIGURE DEVICE SECTION ===================== //
-    
 
     // =================== CONFIGURE TRANSACTION SECTION ==================== //
     // We must reset the system when the power supply is turned on (see datasheet: 19.1 Power-On Start-Up Sequence)
@@ -127,7 +104,6 @@ extern "C" void app_main(void)
     // We are sending two bytes (16 bits), the second is a garbage byte just to be able to receive the response
     partnum_register.length = 16; 
     ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &partnum_register));
-    // Expect NOT to see 0x00 for register value.  0x00 For Status Byte means OK.
     ESP_LOGI("CC1101", "Status Byte: 0x%02X, PARTNUM Register value: 0x%02X", rx[0], rx[1]);
 
     spi_transaction_t version_register = {};
@@ -137,8 +113,6 @@ extern "C" void app_main(void)
     version_register.rx_buffer = rx_v;
     version_register.length = 16;
     ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &version_register));
-    // Expect NOT to see 0x00 for register value.  0x00 For Status Byte means OK.
     ESP_LOGI("CC1101", "Status Byte: 0x%02X, VERSION Register value: 0x%02X", rx_v[0], rx_v[1]);
     // ================= END CONFIGURE TRANSACTION SECTION ================= //
-
 }
