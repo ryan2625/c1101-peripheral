@@ -37,19 +37,39 @@ extern "C" {
 }
 
 void strobe_reset(spi_device_handle_t cc1101) {
-    spi_transaction_t t = {};
+    spi_transaction_t reset_strobe = {};
     uint8_t tx[1]= {0x30}; // Target the command strobe (NON-status register) SRES (Reset Chip)
     uint8_t rx[1]= {0x00}; 
-    t.tx_buffer = tx;
-    t.rx_buffer = rx;
-    t.length = 8; 
-    ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &t));
+    reset_strobe.tx_buffer = tx;
+    reset_strobe.rx_buffer = rx;
+    reset_strobe.length = 8; 
+    ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &reset_strobe));
+
+    spi_transaction_t idle = {};
+    uint8_t tx_i[1]= {0x36}; // Target the idle strobe (NON-status register) SIDLE (Exit RX / TX)
+    uint8_t rx_i[1]= {0x00}; 
+    idle.tx_buffer = tx_i;
+    idle.rx_buffer = rx_i;
+    idle.length = 8; 
+    ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &idle)); // You can only flush in idle mode
+
+    spi_transaction_t flush_tx = {};
+    uint8_t tx_f[1]= {0x3B}; // Target the flush tx strobe (NON-status register) SFTX (Flush the TX FIFO buffer)
+    uint8_t rx_f[1]= {0x00}; 
+    flush_tx.tx_buffer = tx_f;
+    flush_tx.rx_buffer = rx_f;
+    flush_tx.length = 8; 
+    ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &flush_tx));
+    ESP_LOGI("CC1101", "Status Byte: 0x%02X", rx_f[0]);
+    // A sequence of resetting, idling, then flushing lets cc1101 have safe register values to continue.
+    // Alternatively, we can just add a delay after the reset (vTaskDelay(pdMS_TO_TICKS(2))) and this 
+    // accomplishes the same goal. Idling and flushing may not be necessary.
 };
 
 extern "C" void app_main(void)
 {
     vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGI("MAIN", "Hello World!");
+    ESP_LOGI("MAIN", "Hello World...?");
 
 
     // ======================CONFIGURE BUS SECTION=========================== //
@@ -107,7 +127,7 @@ extern "C" void app_main(void)
     // We are sending two bytes (16 bits), the second is a garbage byte just to be able to receive the response
     partnum_register.length = 16; 
     ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &partnum_register));
-    // Expect NOT to see 0x00 for these values. 
+    // Expect NOT to see 0x00 for register value.  0x00 For Status Byte means OK.
     ESP_LOGI("CC1101", "Status Byte: 0x%02X, PARTNUM Register value: 0x%02X", rx[0], rx[1]);
 
     spi_transaction_t version_register = {};
@@ -117,9 +137,8 @@ extern "C" void app_main(void)
     version_register.rx_buffer = rx_v;
     version_register.length = 16;
     ESP_ERROR_CHECK(spi_device_polling_transmit(cc1101, &version_register));
-    // Expect NOT to see 0x00 for these values. 
+    // Expect NOT to see 0x00 for register value.  0x00 For Status Byte means OK.
     ESP_LOGI("CC1101", "Status Byte: 0x%02X, VERSION Register value: 0x%02X", rx_v[0], rx_v[1]);
     // ================= END CONFIGURE TRANSACTION SECTION ================= //
-
 
 }
