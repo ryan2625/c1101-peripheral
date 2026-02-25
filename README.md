@@ -118,7 +118,7 @@ extern "C" void app_main(void) {
     - quadwp & quadhd: Set to -1 indicating we are not using these
 - SPI_DMA_DISABLED
     - Controls whether the SPI driver uses Direct Memory Access for transfers. DMA can be disabled for small and simple transfers. 
-
+> Note: If we were to set SPI_DMA_CH_AUTO, we would have to change how we manage memory such as using `uint8_t* tx = (uint8_t*) heap_caps_malloc(64, MALLOC_CAP_DMA);`
 
 # 4. Register a Device 
 
@@ -245,4 +245,5 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 
 Alternatively, you can try to send the SRES strobe right away. After, You can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
