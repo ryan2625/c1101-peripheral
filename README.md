@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project demonstrates how to interface a CC1101 RF transceiver with an ESP32 using the ESP-IDF SPI Master driver. In this demo, we will be accessing a status register inside of CC1101 (and performing a few other operations). A successful read of this register will confirm we have set up our devices to communicate successfully. The relevant code can be found in main/main.cpp. 
+This project demonstrates how to interface a CC1101 RF transceiver with an ESP32 using the ESP-IDF SPI Master driver. In this demo, we will be accessing a status register inside the CC1101 (and performing a few other operations). A successful read of this register will confirm we have set up our devices to communicate successfully. The relevant code can be found in main/main.cpp. 
 > Note: Using the ESP-IDF directly gives us more control over writing firmware, but it requires more manual setup in the process and the complexity increases quickly. If you are looking for an easier solution for writing firmware, use Arduino. 
 
 This can be accomplished in five steps:
