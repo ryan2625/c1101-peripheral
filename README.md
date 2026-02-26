@@ -224,6 +224,7 @@ extern "C" void app_main(void) {
     ...
 }
 ```
+> Note: This functionality has been refactored into helper functions in main.cpp
 ### Determining spi_device_polling_transmit parameters 
 - cc1101
     - The device name we created earlier in our process
