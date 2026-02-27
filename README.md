@@ -110,7 +110,7 @@ extern "C" void app_main(void) {
     ...
 }
 ```
-> Note: We can wrap our spi functions with an error handler to ensure errors propagate correctly and get logged to the console such as: ESP_ERROR_CHECK(spi_bus_initialize(SPI3_HOST, &busConfig, SPI_DMA_DISABLED));
+> Note: We can wrap our spi functions with an error handler to ensure errors propagate correctly and get logged to the console such as: `ESP_ERROR_CHECK(spi_bus_initialize(SPI3_HOST, &busConfig, SPI_DMA_DISABLED));`.
 
 ### Determining spi_bus_initialize parameters
 - SPI3_HOST
@@ -254,6 +254,7 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 > [!TIP]
 > Alternatively, you can try to send the SRES strobe right away. After sending SRES, you can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
 
 
