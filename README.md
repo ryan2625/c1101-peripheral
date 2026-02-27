@@ -162,7 +162,7 @@ extern "C" void app_main(void) {
     - Use the same host that you specified in the bus configuration step
 - deviceConfig
     - command, address, & dummy bits: The CC1101 does not have any phases specified in a transfer (see section 10: 4-wire Serial Configuration and Data Interface in the CC1101 datasheet)
-    - clock_speed_hz: Table 22 in the CC1101 datasheet specifies the max frequency as 10MHz. This value should be lower than that
+    - clock_speed_hz: Table 22 in the CC1101 datasheet specifies the max frequency as 6-10 MHz depending on the action. This value should be lower than that.
     - spics_io_num: The GPIO pin we wired CSn to. Use -1 if you want to control the chip select manually. If you are to control it manually, read section 10 of the CC1101 datasheet where it specifies the CSn pin values.
     - queue_size: Set to 1 as our program is only using synchronous methods (such as spi_device_polling_transmit())
     - mode: The SPI mode is determined by a combination of the Clock Polarity (CPOL) and the Clock Phase (CPHA). From the diagram (figure 15 in the CC1101 datasheet), we can see the SCLK line starts and idles low. So the CPOL is zero. We can also see that the lines indicate data is sampled on the rising edge of the SCLK signal, meaning the CPHA is zero. A combination of CPOL = 0 and CPHA = 0 means the SPI mode is 0. ![CC1101 Pinout](assets/timing_transfer.png)
@@ -252,6 +252,7 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 > [!TIP]
 > Alternatively, you can try to send the SRES strobe right away. After, You can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
 
 
