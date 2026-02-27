@@ -3,7 +3,7 @@
 ## Introduction
 
 This project demonstrates how to interface a CC1101 RF transceiver with an ESP32 using the ESP-IDF SPI Master driver. In this demo, we will be accessing a status register inside the CC1101 (and performing a few other operations). A successful read of this register will confirm we have set up our devices to communicate successfully. The relevant code can be found in main/main.cpp. 
-> Note: Using ESP-IDF directly gives us more control over writing firmware, but it requires more manual setup in the process and the complexity increases quickly. If you are looking for an easier solution for writing firmware, use Arduino. 
+> Note: We use ESP-IDF here for full control and learning purposes, but Arduino can be a simpler option for long-term development.
 
 Writing this firmware can be accomplished in five steps:
 - Acquiring prerequisites (hardware, software)
@@ -253,6 +253,7 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 > [!TIP]
 > Alternatively, you can try to send the SRES strobe right away. After, You can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
 
 
