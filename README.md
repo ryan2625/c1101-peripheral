@@ -250,10 +250,11 @@ The government-approved method of accomplishing this is as follows:
 - Wait for MISO to go LOW
 - Send `SRES`
 
-This would require you to set spics_io_num to -1 when adding a device to the bus. Then, you would have to control the CSn manually. As specified by the data sheet in section 10.1, CSn will have to stay pulled low during any SPI transaction. This behavior is visualized in figure 15 of the datasheet and displayed above (in `main/assets/transfer_timing.png`)
+This would require you to set spics_io_num to -1 when adding a device to the bus. Then, you would have to control the CSn manually. As specified by the data sheet in section 10.1, CSn will have to stay pulled low during any SPI transaction. This behavior is visualized in figure 15 of the datasheet and displayed above (in `assets/transfer_timing.png`)
 
 > [!TIP]
 > Alternatively, you can try to send the `SRES` strobe right away. After sending `SRES`, you can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with `TXFIFO_UNDERFLOW` (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes `SRES`, `SIDLE`, and `SFTX` in that order. After this sequence, your device should be ready to use. See `strobe_reset` in `main.cpp`.
+
 
 
 
