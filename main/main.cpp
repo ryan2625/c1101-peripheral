@@ -64,7 +64,7 @@ void strobe_reset(spi_device_handle_t cc1101) {
         "SFTX"
     );
 };
-
+// To write c++ in the ESP-IDF, we have to include extern "C"
 extern "C" void app_main(void)
 {
     vTaskDelay(pdMS_TO_TICKS(1000));
