@@ -73,8 +73,9 @@ Note: The pinout can change based on the type of ESP32 you own.
 | SCLK       | GPIO 18   |
 | GDO0       | GPIO 4    |
 | GDO2       | Optional / Not Used |
-> Note: Ensure VCC on the CC1101 is not connected to any voltage higher than 3.3V
+> Note: Ensure VCC on the CC1101 is connected to 3.3V only. Applying 5V can damage the chip.
 
+Once everything is wired up and the prerequisites are complete, we can begin writing the firmware using ESP-IDF. If you're new to ESP-IDF, there are several videos online that can assist with setting up a project from scratch. I recommend [this one](https://www.youtube.com/watch?v=oHHOCdmLiII). After your environment is ready, open main.cpp and we will begin implementing the SPI configuration.
 # 3. Initialize an SPI Bus
 
 ### Method: `spi_bus_initialize()`
@@ -247,6 +248,7 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 
 Alternatively, you can try to send the SRES strobe right away. After, You can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
 
 
