@@ -8,11 +8,11 @@ This project demonstrates how to interface a CC1101 RF transceiver with an ESP32
 Writing this firmware can be accomplished in five steps:
 - Acquiring prerequisites (hardware, software)
 - Wiring the appropriate pins from the CC1101 to the ESP32
-- Initialize a SPI bus using ESP-IDF  
+- Initialize an SPI bus using ESP-IDF  
 - Register the CC1101 as a device on that bus  
 - Perform SPI transactions to validate communication  
 
-This README will reference the [ESP32 documentation](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/spi_master.html) and the official [TI CC1101 transceiver datasheet](https://www.ti.com/lit/ds/symlink/cc1101.pdf). Basic programming experience, familiarity with the [SPI Interface](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html), and development board knowledge (Raspberry Pi, Arduino, ESP32) will be helpful to follow along.
+This README will reference the [ESP32 documentation](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/spi_master.html) and the official [TI CC1101 transceiver datasheet](https://www.ti.com/lit/ds/symlink/cc1101.pdf). Basic programming experience, familiarity with the [SPI interface](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html), and development board knowledge (Raspberry Pi, Arduino, ESP32) will be helpful to follow along.
 
 
 ## Table of Contents
@@ -114,7 +114,7 @@ extern "C" void app_main(void) {
 
 ### Determining spi_bus_initialize parameters
 - SPI3_HOST
-    - The SPI peripheral you are selecting. There are 4 SPI peripherals on the classic ESP32. Two are tied to internal ESP32 operations, while SPI2_HOST and SPI3_HOST are available for public interfacing.
+    - The SPI peripheral you are selecting. There are four SPI peripherals on the classic ESP32. Two are tied to internal ESP32 operations, while SPI2_HOST and SPI3_HOST are available for public interfacing.
 - busConfig
     - mosi_io_num: The GPIO pin that connects the MOSI pin.
     - miso_io_num: The GPIO pin that connects the MISO pin.
@@ -191,7 +191,7 @@ The CC1101 does not have separate phases for sending bytes (no separate command 
 - Bit position 7 tells the CC1101 if we are reading an address or writing to an address.
 - Bit position 6 specifies if we are using single or multi-byte access. There is also a special use case for this bit: if a register is overloaded, this specifies if we want to access the value at a status register by setting the bit to 1 or we want to send a command strobe by setting this bit to 0. 
     - For example, address 0x30 contains both the command strobe for resetting the device and the location where the PARTNUM value lives. If we just send the byte 0x30, we would activate the reset sequence on the device. If we send the byte 0xF0 (which is 0x30 with a burst bit set to 1 at bit 6), we would receive back the PARTNUM value. 
-- Bit position 5-0 is the address that we want to interact with. the first two bits in the byte address are not included and replaced by the R/W and burst bit. Below are some relevant addresses with different command strobes (Table 42) and status register values (Table 44). 
+- Bit position 5-0 is the address that we want to interact with. The first two bits in the byte address are not included and replaced by the R/W and burst bits. Below are some relevant addresses with different command strobes (Table 42) and status register values (Table 44). 
 
 <div align="center">
 <strong>Table 42: Command Strobes</strong><br>
@@ -227,7 +227,7 @@ extern "C" void app_main(void) {
     version_register.tx_buffer = tx_v;
     version_register.rx_buffer = rx_v;
     version_register.length = 16;
-    spi_device_polling_transmit(cc1101, &version_register)
+    spi_device_polling_transmit(cc1101, &version_register);
     ...
 }
 ```
@@ -253,7 +253,8 @@ The government-approved method of accomplishing this is as follows:
 This would require you to set spics_io_num to -1 when adding a device to the bus. Then, you would have to control the CSn manually.
 
 > [!TIP]
-> Alternatively, you can try to send the SRES strobe right away. After, You can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+> Alternatively, you can try to send the SRES strobe right away. After sending SRES, you can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
 
 
