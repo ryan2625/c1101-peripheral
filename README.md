@@ -203,7 +203,7 @@ The CC1101 does not have separate phases for sending bytes (no separate command 
 > When transmitting bytes to the CC1101, the device will always respond with a Chip Status Byte when it receives data from the master. Since the SPI protocol is a full duplex, the slave can only send bits while the master clocks it. 
 > For more information, see sections 10.1 and 10.2 on the CC1101 datasheet. Further reading about the [SPI protocol](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html) is recommended if a full-duplex SPI is unfamiliar.
 > 
->  Example: To read the value in the `PARTNUM` register, we would send `1` (read) `1` (burst bit for overloaded register) `110000` (the address where this register is located). `1111 0000` = `0xF0`. Since we can only receive bits while the master is sending, we would send two bytes `0xF0 0x00` (where `0x00` is a dummy byte meant to just give time for the slave to send back the requested data) and receive two bytes corresponding to the Chip Status Byte and the actual register value.
+>  Example: To read the value in the `PARTNUM` register, we would send `1` (read) `1` (burst bit for overloaded register) `110000` (the address where this register is located). `1111 0000` = `0xF0`. Since we can only receive bits while the master is sending, we would send two bytes `0xF0 0x00` (where `0x00` is a dummy byte meant to just give time for the slave to send back the requested data) and receive two bytes corresponding to the Chip Status Byte and the actual register value. Sending only the byte `0xF0` would give us the chip status byte, but not the actual register value.
 # 6. Interact with the Device
 
 ### Method: `spi_device_polling_transmit()`
@@ -231,7 +231,7 @@ extern "C" void app_main(void) {
     ...
 }
 ```
-> Note: This functionality has been refactored into helper functions in main.cpp
+> Note: This functionality has been refactored into helper functions in main.cpp.
 ### Determining spi_device_polling_transmit parameters 
 - cc1101
     - The device name we created earlier in our process.
@@ -254,6 +254,7 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 > [!TIP]
 > Alternatively, you can try to send the SRES strobe right away. After sending SRES, you can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with TXFIFO_UNDERFLOW (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes SRES, SIDLE, and SFTX in that order. After this sequence, your device should be ready to use. See `strobe_reset` in main.cpp.
+
 
 
 
