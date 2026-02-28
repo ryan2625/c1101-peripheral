@@ -71,7 +71,7 @@ This README will reference the [ESP32 documentation](https://docs.espressif.com/
 | CSn        | GPIO 5    |
 | MOSI (SI)  | GPIO 23   |
 | MISO (SO)  | GPIO 19   |
-| SCLK       | GPIO 18   |
+| SCK        | GPIO 18   |
 | GDO0       | GPIO 4    |
 | GDO2       | Optional / Not Used |
 > [!WARNING]
@@ -254,6 +254,7 @@ This would require you to set spics_io_num to -1 when adding a device to the bus
 
 > [!TIP]
 > Alternatively, you can try to send the `SRES` strobe right away. After sending `SRES`, you can either wait a few ms for the crystal oscillator to stabilize, or you can follow by flushing the transmit buffer (which you can only do in idle mode) as there are some cases where the system starts in a state with `TXFIFO_UNDERFLOW` (see Table 23 in the datasheet). So the entire startup sequence will be to send the command strobes `SRES`, `SIDLE`, and `SFTX` in that order. After this sequence, your device should be ready to use. See `strobe_reset` in `main.cpp`.
+
 
 
 
